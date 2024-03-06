@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback System</title>
+<style>
+    /* Basic styling */
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .feedback-container {
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .feedback-item {
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .feedback-item button {
+        margin-left: 10px;
+    }
+    .ratings {
+        margin-bottom: 10px;
+    }
+</style>
+</head>
+<body>
+<div class="feedback-container">
+    <h2>Overall Ratings</h2>
+    <div class="ratings">
+        <span>*</span> <span id="star1">0</span><br>
+        <span>**</span> <span id="star2">0</span><br>
+        <span>***</span> <span id="star3">0</span><br>
+        <span>****</span> <span id="star4">0</span><br>
+        <span>*****</span> <span id="star5">0</span><br>
+    </div>
+    <h2>Feedback Form</h2>
+    <form id="feedback-form">
+        <div class="form-group">
+            <label for="name">Enter Your Name:</label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+            <label for="rating">Choose Rating:</label>
+            <select id="rating" required>
+                <option value="">Select Rating</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+        <button type="submit">SUBMIT</button>
+    </form>
+    <hr>
+    <h2>All Feedbacks</h2>
+    <div id="feedback-list"></div>
+</div>
+
+<script>
+    const feedbackForm = document.getElementById('feedback-form');
+    const feedbackList = document.getElementById('feedback-list');
+    const ratings = {
+        1: document.getElementById('star1'),
+        2: document.getElementById('star2'),
+        3: document.getElementById('star3'),
+        4: document.getElementById('star4'),
+        5: document.getElementById('star5')
+    };
+
+    // Function to update overall ratings
+    function updateRatings() {
+        for (const rating in ratings) {
+            ratings[rating].textContent = document.querySelectorAll(`[data-rating="${rating}"]`).length;
+        }
+    }
+
+    feedbackForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const rating = document.getElementById('rating').value;
+
+        const feedbackItems = feedbackList.querySelectorAll('.feedback-item');
+        let existingFeedbackItem = null;
+
+        // Check if there's existing feedback from the same user
+        feedbackItems.forEach(item => {
+            const itemUserName = item.querySelector('span').textContent.split(':')[1].trim();
+            if (itemUserName === name) {
+                existingFeedbackItem = item;
+            }
+        });
+
+        if (existingFeedbackItem) {
+            // Update existing feedback item
+            existingFeedbackItem.querySelector('span').nextSibling.textContent = `Rating: ${rating}`;
+        } else {
+            // Create new feedback item
+            const feedbackItem = document.createElement('div');
+            feedbackItem.classList.add('feedback-item');
+            feedbackItem.innerHTML = `
+                <span>Name: ${name}</span>
+                <span>Rating: ${rating}</span>
+                <button class="delete-btn">DELETE</button>
+                <button class="edit-btn" onclick="populateForm('${name}', ${rating})">EDIT</button>
+            `;
+            
+            feedbackList.appendChild(feedbackItem);
+        }
+
+        // Update overall ratings
+        updateRatings();
+
+        // Clear form inputs
+        feedbackForm.reset();
+    });
+
+    function populateForm(name, rating) {
+        document.getElementById('name').value = name;
+        document.getElementById('rating').value = rating;
+    }
+
+    feedbackList.addEventListener('click', function(event) {
+        if (event.target.classList.contains('delete-btn')) {
+            event.target.parentElement.remove();
+            // Update overall ratings after deletion
+            updateRatings();
+        }
+    });
+</script>
+</body>
+</html>
